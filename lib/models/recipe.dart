@@ -9,7 +9,7 @@ class Recipe {
     return Recipe(
         id: json['id'],
         title: json['title'],
-        image: json['body']
+        image: json['image']
     );
   }
 }
