@@ -15,7 +15,9 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
 
-  var url = Uri.parse('https://api.spoonacular.com/recipes/random?apiKey=89bc7b285b1449f49d0c70d3bd26e4cf&number=10');
+  int selectedIndex = 1;
+
+  var url = Uri.parse('https://api.spoonacular.com/recipes/random?apiKey=8c5c67f1ada4419ebd242d23d347adf4&number=10');
   Future<List<Recipe>> fetchRecipes() async {
     http.Response response = await http.get(url);
     for(var r in json.decode(response.body)['recipes']){
@@ -55,29 +57,69 @@ class _HomeState extends State<Home> {
           )
         ],
       ),
+        bottomNavigationBar: Container(
+          decoration: const BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0x54000000),
+                  spreadRadius: 1,
+                  blurRadius: 70,
+                )
+              ]
+          ),
+          child: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topRight: Radius.circular(40),
+                topLeft: Radius.circular(40),
+              ),
+              child: BottomNavigationBar(
+                iconSize: 30,
+                currentIndex: selectedIndex,
+                onTap: (index){
+                  setState(() {
+                    selectedIndex = index;
+                  });
+                },
+                items: const [
+                  BottomNavigationBarItem(icon: Icon(Icons.home), label: '1'),
+                  BottomNavigationBarItem(icon: Icon(Icons.favorite_outline), label: '2'),
+                  BottomNavigationBarItem(icon: Icon(Icons.shopping_cart_outlined), label: '3'),
+                  BottomNavigationBarItem(icon: Icon(Icons.error_outline), label: '4'),
+                  BottomNavigationBarItem(icon: Icon(Icons.person), label: '5'),
+                ],
+                unselectedItemColor: Colors.black,
+                selectedItemColor: const Color(0xff287c6d),
+                showSelectedLabels: false,
+                showUnselectedLabels: false,
+              ),
+            ),
+        ),
       body: Center(
         child: FutureBuilder<List<Recipe>>(
           future: fetchRecipes(),
           builder: (context,snapshot) {
-            if(snapshot.hasData) {
-              return GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 1,
-                  ),
-                itemCount: snapshot.data!.length,
-                itemBuilder: (BuildContext context, int index) {
-                    return Padding(
-                        padding: const EdgeInsets.all(8),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white70
-                        ),
-                        onPressed: () {
-                          Navigator.push(context,
-                            MaterialPageRoute(builder: (context) => const SecondScreen()),
-                          );
-                        },
+          if(snapshot.hasData) {
+            return GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 1,
+                ),
+              itemCount: snapshot.data!.length,
+              itemBuilder: (BuildContext context, int index) {
+                  return Padding(
+                      padding: const EdgeInsets.all(8),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white70
+                      ),
+                      onPressed: () {
+                        Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => SecondScreen(
+                            id: snapshot.data![index].id,
+                          )),
+                        );
+                      },
+                      child: SingleChildScrollView(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -89,17 +131,18 @@ class _HomeState extends State<Home> {
                           ],
                         ),
                       ),
-                    );
-              },
-              );
-            } else if (snapshot.hasError) {
-              return Text('${snapshot.error}');
-            }
-            return const CircularProgressIndicator(
-              color: Color(0xff287c6d),
+                    ),
+                  );
+            },
             );
-          },
-        ),
+          } else if (snapshot.hasError) {
+            return Text('${snapshot.error}');
+          }
+          return const CircularProgressIndicator(
+            color: Color(0xff287c6d),
+          );
+        },
+      ),
       ),
     );
   }
